@@ -152,10 +152,10 @@ export const updateSavedWord = createServerFn({ method: "POST" })
     listId: data.listId,
   }))
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = {};
-    if (data.note !== undefined) patch["note"] = data.note;
-    if (data.tags !== undefined) patch["tags"] = data.tags;
-    if (data.listId !== undefined) patch["list_id"] = data.listId;
+    const patch: { note?: string; tags?: string[]; list_id?: string } = {};
+    if (data.note !== undefined) patch.note = data.note;
+    if (data.tags !== undefined) patch.tags = data.tags;
+    if (data.listId !== undefined) patch.list_id = data.listId;
     const { error } = await context.supabase.from("saved_words").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
