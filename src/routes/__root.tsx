@@ -77,11 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Lexicon — A dictionary that remembers your words" },
+      {
+        name: "description",
+        content:
+          "Look up definitions and keep the words you love in your own tagged, annotated word lists.",
+      },
+      { property: "og:title", content: "Lexicon — A dictionary that remembers your words" },
+      {
+        property: "og:description",
+        content:
+          "Look up definitions and keep the words you love in your own tagged, annotated word lists.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
