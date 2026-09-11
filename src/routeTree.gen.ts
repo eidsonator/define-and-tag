@@ -13,8 +13,18 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as ApiListsRouteImport } from './routes/api/lists'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
+import { Route as ApiWordsRouteImport } from './routes/api/words'
 import { Route as AuthenticatedListsIndexRouteImport } from './routes/_authenticated/lists.index'
 import { Route as AuthenticatedListsListIdRouteImport } from './routes/_authenticated/lists.$listId'
+import { Route as ApiListsIdRouteImport } from './routes/api/lists.$id'
+import { Route as ApiPublicListsRouteImport } from './routes/api/public/lists'
+import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
+import { Route as ApiPublicWordsRouteImport } from './routes/api/public/words'
+import { Route as ApiWordsIdRouteImport } from './routes/api/words.$id'
+import { Route as ApiPublicListsIdRouteImport } from './routes/api/public/lists.$id'
+import { Route as ApiPublicWordsIdRouteImport } from './routes/api/public/words.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,6 +45,21 @@ const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiListsRoute = ApiListsRouteImport.update({
+  id: '/api/lists',
+  path: '/api/lists',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWordsRoute = ApiWordsRouteImport.update({
+  id: '/api/words',
+  path: '/api/words',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedListsIndexRoute = AuthenticatedListsIndexRouteImport.update({
   id: '/lists/',
   path: '/lists/',
@@ -46,20 +71,75 @@ const AuthenticatedListsListIdRoute =
     path: '/lists/$listId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiListsIdRoute = ApiListsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiListsRoute,
+} as any)
+const ApiPublicListsRoute = ApiPublicListsRouteImport.update({
+  id: '/api/public/lists',
+  path: '/api/public/lists',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
+  id: '/api/public/mcp',
+  path: '/api/public/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWordsRoute = ApiPublicWordsRouteImport.update({
+  id: '/api/public/words',
+  path: '/api/public/words',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWordsIdRoute = ApiWordsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiWordsRoute,
+} as any)
+const ApiPublicListsIdRoute = ApiPublicListsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiPublicListsRoute,
+} as any)
+const ApiPublicWordsIdRoute = ApiPublicWordsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiPublicWordsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/api/lists': typeof ApiListsRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
+  '/api/words': typeof ApiWordsRouteWithChildren
   '/lists/$listId': typeof AuthenticatedListsListIdRoute
+  '/api/lists/$id': typeof ApiListsIdRoute
+  '/api/public/lists': typeof ApiPublicListsRouteWithChildren
+  '/api/public/mcp': typeof ApiPublicMcpRoute
+  '/api/public/words': typeof ApiPublicWordsRouteWithChildren
+  '/api/words/$id': typeof ApiWordsIdRoute
   '/lists/': typeof AuthenticatedListsIndexRoute
+  '/api/public/lists/$id': typeof ApiPublicListsIdRoute
+  '/api/public/words/$id': typeof ApiPublicWordsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/api/lists': typeof ApiListsRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
+  '/api/words': typeof ApiWordsRouteWithChildren
   '/lists/$listId': typeof AuthenticatedListsListIdRoute
+  '/api/lists/$id': typeof ApiListsIdRoute
+  '/api/public/lists': typeof ApiPublicListsRouteWithChildren
+  '/api/public/mcp': typeof ApiPublicMcpRoute
+  '/api/public/words': typeof ApiPublicWordsRouteWithChildren
+  '/api/words/$id': typeof ApiWordsIdRoute
   '/lists': typeof AuthenticatedListsIndexRoute
+  '/api/public/lists/$id': typeof ApiPublicListsIdRoute
+  '/api/public/words/$id': typeof ApiPublicWordsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -67,28 +147,84 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
+  '/api/lists': typeof ApiListsRouteWithChildren
+  '/api/mcp': typeof ApiMcpRoute
+  '/api/words': typeof ApiWordsRouteWithChildren
   '/_authenticated/lists/$listId': typeof AuthenticatedListsListIdRoute
+  '/api/lists/$id': typeof ApiListsIdRoute
+  '/api/public/lists': typeof ApiPublicListsRouteWithChildren
+  '/api/public/mcp': typeof ApiPublicMcpRoute
+  '/api/public/words': typeof ApiPublicWordsRouteWithChildren
+  '/api/words/$id': typeof ApiWordsIdRoute
   '/_authenticated/lists/': typeof AuthenticatedListsIndexRoute
+  '/api/public/lists/$id': typeof ApiPublicListsIdRoute
+  '/api/public/words/$id': typeof ApiPublicWordsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/search' | '/lists/$listId' | '/lists/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/search'
+    | '/api/lists'
+    | '/api/mcp'
+    | '/api/words'
+    | '/lists/$listId'
+    | '/api/lists/$id'
+    | '/api/public/lists'
+    | '/api/public/mcp'
+    | '/api/public/words'
+    | '/api/words/$id'
+    | '/lists/'
+    | '/api/public/lists/$id'
+    | '/api/public/words/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/search' | '/lists/$listId' | '/lists'
+  to:
+    | '/'
+    | '/auth'
+    | '/search'
+    | '/api/lists'
+    | '/api/mcp'
+    | '/api/words'
+    | '/lists/$listId'
+    | '/api/lists/$id'
+    | '/api/public/lists'
+    | '/api/public/mcp'
+    | '/api/public/words'
+    | '/api/words/$id'
+    | '/lists'
+    | '/api/public/lists/$id'
+    | '/api/public/words/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/search'
+    | '/api/lists'
+    | '/api/mcp'
+    | '/api/words'
     | '/_authenticated/lists/$listId'
+    | '/api/lists/$id'
+    | '/api/public/lists'
+    | '/api/public/mcp'
+    | '/api/public/words'
+    | '/api/words/$id'
     | '/_authenticated/lists/'
+    | '/api/public/lists/$id'
+    | '/api/public/words/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiListsRoute: typeof ApiListsRouteWithChildren
+  ApiMcpRoute: typeof ApiMcpRoute
+  ApiWordsRoute: typeof ApiWordsRouteWithChildren
+  ApiPublicListsRoute: typeof ApiPublicListsRouteWithChildren
+  ApiPublicMcpRoute: typeof ApiPublicMcpRoute
+  ApiPublicWordsRoute: typeof ApiPublicWordsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -121,6 +257,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/lists': {
+      id: '/api/lists'
+      path: '/api/lists'
+      fullPath: '/api/lists'
+      preLoaderRoute: typeof ApiListsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/words': {
+      id: '/api/words'
+      path: '/api/words'
+      fullPath: '/api/words'
+      preLoaderRoute: typeof ApiWordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/lists/': {
       id: '/_authenticated/lists/'
       path: '/lists'
@@ -134,6 +291,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/lists/$listId'
       preLoaderRoute: typeof AuthenticatedListsListIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/lists/$id': {
+      id: '/api/lists/$id'
+      path: '/$id'
+      fullPath: '/api/lists/$id'
+      preLoaderRoute: typeof ApiListsIdRouteImport
+      parentRoute: typeof ApiListsRoute
+    }
+    '/api/public/lists': {
+      id: '/api/public/lists'
+      path: '/api/public/lists'
+      fullPath: '/api/public/lists'
+      preLoaderRoute: typeof ApiPublicListsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mcp': {
+      id: '/api/public/mcp'
+      path: '/api/public/mcp'
+      fullPath: '/api/public/mcp'
+      preLoaderRoute: typeof ApiPublicMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/words': {
+      id: '/api/public/words'
+      path: '/api/public/words'
+      fullPath: '/api/public/words'
+      preLoaderRoute: typeof ApiPublicWordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/words/$id': {
+      id: '/api/words/$id'
+      path: '/$id'
+      fullPath: '/api/words/$id'
+      preLoaderRoute: typeof ApiWordsIdRouteImport
+      parentRoute: typeof ApiWordsRoute
+    }
+    '/api/public/lists/$id': {
+      id: '/api/public/lists/$id'
+      path: '/$id'
+      fullPath: '/api/public/lists/$id'
+      preLoaderRoute: typeof ApiPublicListsIdRouteImport
+      parentRoute: typeof ApiPublicListsRoute
+    }
+    '/api/public/words/$id': {
+      id: '/api/public/words/$id'
+      path: '/$id'
+      fullPath: '/api/public/words/$id'
+      preLoaderRoute: typeof ApiPublicWordsIdRouteImport
+      parentRoute: typeof ApiPublicWordsRoute
     }
   }
 }
@@ -153,10 +359,64 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ApiListsRouteChildren {
+  ApiListsIdRoute: typeof ApiListsIdRoute
+}
+
+const ApiListsRouteChildren: ApiListsRouteChildren = {
+  ApiListsIdRoute: ApiListsIdRoute,
+}
+
+const ApiListsRouteWithChildren = ApiListsRoute._addFileChildren(
+  ApiListsRouteChildren,
+)
+
+interface ApiWordsRouteChildren {
+  ApiWordsIdRoute: typeof ApiWordsIdRoute
+}
+
+const ApiWordsRouteChildren: ApiWordsRouteChildren = {
+  ApiWordsIdRoute: ApiWordsIdRoute,
+}
+
+const ApiWordsRouteWithChildren = ApiWordsRoute._addFileChildren(
+  ApiWordsRouteChildren,
+)
+
+interface ApiPublicListsRouteChildren {
+  ApiPublicListsIdRoute: typeof ApiPublicListsIdRoute
+}
+
+const ApiPublicListsRouteChildren: ApiPublicListsRouteChildren = {
+  ApiPublicListsIdRoute: ApiPublicListsIdRoute,
+}
+
+const ApiPublicListsRouteWithChildren = ApiPublicListsRoute._addFileChildren(
+  ApiPublicListsRouteChildren,
+)
+
+interface ApiPublicWordsRouteChildren {
+  ApiPublicWordsIdRoute: typeof ApiPublicWordsIdRoute
+}
+
+const ApiPublicWordsRouteChildren: ApiPublicWordsRouteChildren = {
+  ApiPublicWordsIdRoute: ApiPublicWordsIdRoute,
+}
+
+const ApiPublicWordsRouteWithChildren = ApiPublicWordsRoute._addFileChildren(
+  ApiPublicWordsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiListsRoute: ApiListsRouteWithChildren,
+  ApiMcpRoute: ApiMcpRoute,
+  ApiWordsRoute: ApiWordsRouteWithChildren,
+  ApiPublicListsRoute: ApiPublicListsRouteWithChildren,
+  ApiPublicMcpRoute: ApiPublicMcpRoute,
+  ApiPublicWordsRoute: ApiPublicWordsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
