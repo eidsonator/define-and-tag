@@ -34,14 +34,14 @@ export function SaveWordDialog({
   const save = useServerFn(saveWord);
   const create = useServerFn(createList);
 
-  const [listId, setListId] = useState<string>("");
+  const [listIds, setListIds] = useState<string[]>([]);
   const [newListName, setNewListName] = useState("");
   const [note, setNote] = useState("");
   const [tags, setTags] = useState("");
 
   useEffect(() => {
     if (open) {
-      setListId(lists[0]?.id ?? "");
+      setListIds(lists[0] ? [lists[0].id] : []);
       setNewListName("");
       setNote("");
       setTags("");
@@ -50,18 +50,21 @@ export function SaveWordDialog({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      let targetId = listId;
-      if (!targetId || listId === "__new") {
+      let targetIds = listIds;
+      if (listIds.includes("__new")) {
         const name = newListName.trim() || "New list";
         const created = await create({ data: { name } });
-        targetId = created.id;
+        targetIds = [...listIds.filter((id) => id !== "__new"), created.id];
       }
       await save({
         data: {
-          listId: targetId,
+          listIds: targetIds,
           headword,
           note,
-          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
           entry,
         },
       });
@@ -79,20 +82,26 @@ export function SaveWordDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="font-display">Save “{headword}”</DialogTitle>
-          <DialogDescription>Choose a list, then add tags and a note if you like.</DialogDescription>
+          <DialogDescription>
+            Choose one or more lists, then add tags and a note if you like.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>List</Label>
+            <Label>Lists</Label>
             <div className="flex flex-wrap gap-2">
               {lists.map((l) => (
                 <Button
                   key={l.id}
                   type="button"
                   size="sm"
-                  variant={listId === l.id ? "default" : "outline"}
-                  onClick={() => setListId(l.id)}
+                  variant={listIds.includes(l.id) ? "default" : "outline"}
+                  onClick={() =>
+                    setListIds((ids) =>
+                      ids.includes(l.id) ? ids.filter((id) => id !== l.id) : [...ids, l.id],
+                    )
+                  }
                 >
                   {l.name}
                 </Button>
@@ -100,13 +109,17 @@ export function SaveWordDialog({
               <Button
                 type="button"
                 size="sm"
-                variant={listId === "__new" ? "default" : "outline"}
-                onClick={() => setListId("__new")}
+                variant={listIds.includes("__new") ? "default" : "outline"}
+                onClick={() =>
+                  setListIds((ids) =>
+                    ids.includes("__new") ? ids.filter((id) => id !== "__new") : [...ids, "__new"],
+                  )
+                }
               >
                 + New list
               </Button>
             </div>
-            {listId === "__new" && (
+            {listIds.includes("__new") && (
               <Input
                 autoFocus
                 placeholder="Name of the new list"

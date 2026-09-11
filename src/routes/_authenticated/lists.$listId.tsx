@@ -8,11 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { EntryView } from "@/components/EntryView";
 import {
   deleteSavedWord,
+  getLists,
   getList,
   getSavedWords,
+  moveSavedWord,
   updateSavedWord,
   type SavedWord,
 } from "@/lib/words.functions";
@@ -43,6 +52,7 @@ function ListDetailPage() {
   const fetchList = useServerFn(getList);
   const fetchWords = useServerFn(getSavedWords);
   const remove = useServerFn(deleteSavedWord);
+  const fetchLists = useServerFn(getLists);
 
   const [filter, setFilter] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -55,19 +65,20 @@ function ListDetailPage() {
     queryKey: ["saved", listId],
     queryFn: () => fetchWords({ data: { listId } }),
   });
+  const listsQuery = useQuery({
+    queryKey: ["lists"],
+    queryFn: () => fetchLists({ data: undefined }),
+  });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => remove({ data: { id } }),
+    mutationFn: (id: string) => remove({ data: { id, listId } }),
     onSuccess: () => queryClient.invalidateQueries(),
     onError: (e: Error) => toast.error(e.message),
   });
 
   const words = wordsQuery.data ?? [];
 
-  const allTags = useMemo(
-    () => Array.from(new Set(words.flatMap((w) => w.tags))).sort(),
-    [words],
-  );
+  const allTags = useMemo(() => Array.from(new Set(words.flatMap((w) => w.tags))).sort(), [words]);
 
   const visible = useMemo(() => {
     let out = words;
@@ -139,6 +150,8 @@ function ListDetailPage() {
           <li key={word.id}>
             <SavedWordCard
               word={word}
+              listId={listId}
+              lists={listsQuery.data ?? []}
               onDelete={() => deleteMutation.mutate(word.id)}
               onRelatedWordClick={(relatedWord) =>
                 navigate({ to: "/search", search: { word: relatedWord } })
@@ -159,15 +172,19 @@ function ListDetailPage() {
 
 function SavedWordCard({
   word,
+  listId,
+  lists,
   onDelete,
-  onRelatedWordClick,
 }: {
   word: SavedWord;
+  listId: string;
+  lists: { id: string; name: string }[];
   onDelete: () => void;
   onRelatedWordClick: (word: string) => void;
 }) {
   const queryClient = useQueryClient();
   const update = useServerFn(updateSavedWord);
+  const move = useServerFn(moveSavedWord);
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(word.note);
   const [tags, setTags] = useState(word.tags.join(", "));
@@ -178,11 +195,23 @@ function SavedWordCard({
         data: {
           id: word.id,
           note,
-          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
         },
       }),
     onSuccess: () => {
       toast.success("Saved");
+      queryClient.invalidateQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const moveMutation = useMutation({
+    mutationFn: (toListId: string) =>
+      move({ data: { wordId: word.id, fromListId: listId, toListId } }),
+    onSuccess: () => {
+      toast.success("Moved to list");
       queryClient.invalidateQueries();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -197,9 +226,34 @@ function SavedWordCard({
             <p className="mt-1 text-sm text-muted-foreground">{word.entry.shortdefs[0]}</p>
           )}
         </button>
-        <Button size="icon" variant="ghost" aria-label="Remove word" onClick={onDelete}>
-          <Trash2 className="size-4 text-destructive" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Select
+            value=""
+            onValueChange={(toListId) => moveMutation.mutate(toListId)}
+            disabled={moveMutation.isPending || lists.length < 2}
+          >
+            <SelectTrigger className="h-8 w-32 text-xs" aria-label="Move word to another list">
+              <SelectValue placeholder="Move to…" />
+            </SelectTrigger>
+            <SelectContent>
+              {lists
+                .filter((list) => list.id !== listId)
+                .map((list) => (
+                  <SelectItem key={list.id} value={list.id}>
+                    {list.name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Remove word from this list"
+            onClick={onDelete}
+          >
+            <Trash2 className="size-4 text-destructive" />
+          </Button>
+        </div>
       </div>
 
       {word.tags.length > 0 && (

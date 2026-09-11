@@ -149,7 +149,11 @@ function ListsPage() {
                   variant="ghost"
                   aria-label="Delete list"
                   onClick={() => {
-                    if (confirm(`Delete “${list.name}” and the words in it?`))
+                    if (
+                      confirm(
+                        `Delete “${list.name}”? Words that are also in other lists will stay there.`,
+                      )
+                    )
                       deleteMutation.mutate(list.id);
                   }}
                 >
