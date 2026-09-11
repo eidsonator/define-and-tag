@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Trash2, Search, ArrowDownAZ, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,6 +56,7 @@ function ListDetailPage() {
 
   const [filter, setFilter] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"date" | "alpha">("date");
 
   const listQuery = useQuery({
     queryKey: ["list", listId],
@@ -84,6 +85,7 @@ function ListDetailPage() {
     let out = words;
     if (activeTag) out = out.filter((w) => w.tags.includes(activeTag));
     if (filter.trim()) {
+      // Search relevance takes priority over the sort toggle while searching.
       out = out
         .map((w) => ({
           w,
@@ -92,9 +94,15 @@ function ListDetailPage() {
         .filter((r) => r.score > 100)
         .sort((a, b) => b.score - a.score)
         .map((r) => r.w);
+    } else if (sortBy === "alpha") {
+      out = [...out].sort((a, b) => a.headword.localeCompare(b.headword));
+    } else {
+      out = [...out].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
     }
     return out;
-  }, [words, activeTag, filter]);
+  }, [words, activeTag, filter, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -113,14 +121,38 @@ function ListDetailPage() {
         </p>
       </header>
 
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Search saved words and notes"
-          className="bg-paper pl-9"
-        />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Search saved words and notes"
+            className="bg-paper pl-9"
+          />
+        </div>
+        <div
+          className="flex items-center gap-1 rounded-md border border-border bg-paper p-1"
+          role="group"
+          aria-label="Sort words"
+        >
+          <Button
+            size="sm"
+            variant={sortBy === "date" ? "default" : "ghost"}
+            onClick={() => setSortBy("date")}
+            aria-pressed={sortBy === "date"}
+          >
+            <Clock className="size-4" /> Newest
+          </Button>
+          <Button
+            size="sm"
+            variant={sortBy === "alpha" ? "default" : "ghost"}
+            onClick={() => setSortBy("alpha")}
+            aria-pressed={sortBy === "alpha"}
+          >
+            <ArrowDownAZ className="size-4" /> A–Z
+          </Button>
+        </div>
       </div>
 
       {allTags.length > 0 && (
@@ -175,6 +207,7 @@ function SavedWordCard({
   listId,
   lists,
   onDelete,
+  onRelatedWordClick,
 }: {
   word: SavedWord;
   listId: string;
