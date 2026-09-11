@@ -65,7 +65,7 @@ ALTER TABLE public.saved_words DROP CONSTRAINT saved_words_list_id_headword_key;
 ALTER TABLE public.saved_words DROP CONSTRAINT saved_words_list_id_fkey;
 ALTER TABLE public.saved_words DROP COLUMN list_id;
 ALTER TABLE public.saved_words ADD CONSTRAINT saved_words_user_id_headword_key UNIQUE (user_id, headword);
-DROP INDEX public.saved_words_list_idx;
+DROP INDEX IF EXISTS public.saved_words_list_idx;
 
 CREATE INDEX saved_word_lists_list_idx ON public.saved_word_lists (list_id);
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.saved_word_lists TO authenticated;
