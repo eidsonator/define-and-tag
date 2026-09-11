@@ -1,14 +1,18 @@
-# Welcome to your Lovable project
+# Word Keeper Pro
+
+I’d like to create a dictionary app. It should require a login with the password. They should use a free API from a Dictionary website for the backend. It should have a search bar with fuzzy finding. after a word is found, and the definition is given it should offer an option to save the word to the users’s Word list. It should support multiple word list. Words should be able to be tagged and save notes to them.
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://define-and-tag.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/7ec6b529-efe9-4225-907f-92c911c736c2).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +24,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
