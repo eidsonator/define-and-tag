@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -38,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/lists/$listId")({
 
 function ListDetailPage() {
   const { listId } = Route.useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const fetchList = useServerFn(getList);
   const fetchWords = useServerFn(getSavedWords);
@@ -136,7 +137,13 @@ function ListDetailPage() {
       <ul className="space-y-4">
         {visible.map((word) => (
           <li key={word.id}>
-            <SavedWordCard word={word} onDelete={() => deleteMutation.mutate(word.id)} />
+            <SavedWordCard
+              word={word}
+              onDelete={() => deleteMutation.mutate(word.id)}
+              onRelatedWordClick={(relatedWord) =>
+                navigate({ to: "/search", search: { word: relatedWord } })
+              }
+            />
           </li>
         ))}
       </ul>
@@ -150,7 +157,15 @@ function ListDetailPage() {
   );
 }
 
-function SavedWordCard({ word, onDelete }: { word: SavedWord; onDelete: () => void }) {
+function SavedWordCard({
+  word,
+  onDelete,
+  onRelatedWordClick,
+}: {
+  word: SavedWord;
+  onDelete: () => void;
+  onRelatedWordClick: (word: string) => void;
+}) {
   const queryClient = useQueryClient();
   const update = useServerFn(updateSavedWord);
   const [open, setOpen] = useState(false);
@@ -203,7 +218,7 @@ function SavedWordCard({ word, onDelete }: { word: SavedWord; onDelete: () => vo
 
       {open && (
         <div className="mt-4 space-y-4 border-t border-border pt-4">
-          {word.entry && <EntryView entry={word.entry} />}
+          {word.entry && <EntryView entry={word.entry} onRelatedWordClick={onRelatedWordClick} />}
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor={`tags-${word.id}`}>
               Tags

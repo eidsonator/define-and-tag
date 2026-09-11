@@ -12,6 +12,9 @@ import { getLists, getSavedWords } from "@/lib/words.functions";
 import { fuzzyRank } from "@/lib/fuzzy";
 
 export const Route = createFileRoute("/_authenticated/search")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    word: typeof search.word === "string" ? search.word.trim().slice(0, 60) : "",
+  }),
   head: () => ({
     meta: [
       { title: "Look up a word | Lexicon" },
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/search")({
 });
 
 function SearchPage() {
+  const { word: requestedWord } = Route.useSearch();
   const lookup = useServerFn(lookupWord);
   const suggest = useServerFn(suggestWords);
   const fetchLists = useServerFn(getLists);
@@ -93,6 +97,10 @@ function SearchPage() {
     setShowSuggestions(false);
     inputRef.current?.blur();
   }
+
+  useEffect(() => {
+    if (requestedWord && requestedWord !== word) submit(requestedWord);
+  }, [requestedWord, word]);
 
   const result = entryQuery.data;
 
@@ -179,7 +187,7 @@ function SearchPage() {
           ) : (
             result.entries.map((entry) => (
               <div key={entry.id} className="space-y-3">
-                <EntryView entry={entry} />
+                <EntryView entry={entry} onRelatedWordClick={submit} />
                 <div className="flex justify-end">
                   <Button
                     variant="outline"

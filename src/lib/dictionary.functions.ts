@@ -12,6 +12,8 @@ export type DictEntry = {
   date: string | null;
   shortdefs: string[];
   senses: Sense[];
+  synonyms: string[];
+  antonyms: string[];
 };
 
 export type LookupResult = {
@@ -21,6 +23,7 @@ export type LookupResult = {
 };
 
 const API_BASE = "https://dictionaryapi.com/api/v3/references/collegiate/json";
+const THESAURUS_API_BASE = "https://dictionaryapi.com/api/v3/references/thesaurus/json";
 
 function clean(input: string): string {
   return input
@@ -121,12 +124,66 @@ function parseEntry(raw: Unknown): DictEntry | null {
     date: typeof raw["date"] === "string" ? clean(raw["date"] as string) : null,
     shortdefs,
     senses: extractSenses(raw["def"]),
+    synonyms: [],
+    antonyms: [],
   };
 }
 
-async function fetchWord(word: string): Promise<LookupResult> {
+function extractRelatedWords(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+
+  return Array.from(
+    new Set(
+      value
+        .flat(Infinity)
+        .filter((word): word is string => typeof word === "string")
+        .map(clean)
+        .filter(Boolean),
+    ),
+  );
+}
+
+type ThesaurusTerms = Pick<DictEntry, "synonyms" | "antonyms">;
+
+async function fetchThesaurus(word: string): Promise<Map<string, ThesaurusTerms>> {
+  const key = process.env["MERRIAM_WEBSTER_THESAURUS_API_KEY"];
+  if (!key) return new Map();
+
+  try {
+    const url = `${THESAURUS_API_BASE}/${encodeURIComponent(word)}?key=${key}`;
+    const res = await fetch(url);
+    if (!res.ok) return new Map();
+    const json = (await res.json()) as unknown;
+    if (!Array.isArray(json)) return new Map();
+
+    return new Map(
+      (json as Unknown[])
+        .map((raw) => {
+          const meta = raw["meta"] as Unknown | undefined;
+          const id = typeof meta?.["id"] === "string" ? meta["id"] : "";
+          if (!id) return null;
+          return [
+            id,
+            {
+              synonyms: extractRelatedWords(meta?.["syns"]),
+              antonyms: extractRelatedWords(meta?.["ants"]),
+            },
+          ] as const;
+        })
+        .filter((entry): entry is readonly [string, ThesaurusTerms] => entry !== null),
+    );
+  } catch {
+    // Definitions remain useful even when the optional thesaurus service is unavailable.
+    return new Map();
+  }
+}
+
+async function fetchWord(word: string, includeRelatedWords = true): Promise<LookupResult> {
   const key = process.env["MERRIAM_WEBSTER_API_KEY"];
   if (!key) throw new Error("Dictionary is not configured yet.");
+  const thesaurusPromise = includeRelatedWords
+    ? fetchThesaurus(word)
+    : Promise.resolve(new Map<string, ThesaurusTerms>());
   const url = `${API_BASE}/${encodeURIComponent(word)}?key=${key}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("The dictionary service is unavailable right now.");
@@ -141,6 +198,11 @@ async function fetchWord(word: string): Promise<LookupResult> {
     .map(parseEntry)
     .filter((e): e is DictEntry => e !== null)
     .filter((e) => e.shortdefs.length > 0 || e.senses.length > 0);
+  const thesaurusEntries = await thesaurusPromise;
+  for (const entry of entries) {
+    const relatedWords = thesaurusEntries.get(entry.id);
+    if (relatedWords) Object.assign(entry, relatedWords);
+  }
   return { word, entries, suggestions: [] };
 }
 
@@ -157,7 +219,7 @@ export const suggestWords = createServerFn({ method: "POST" })
   .inputValidator((data: { query: string }) => ({ query: String(data.query ?? "").trim().slice(0, 60) }))
   .handler(async ({ data }) => {
     if (data.query.length < 2) return { suggestions: [] as string[] };
-    const result = await fetchWord(data.query);
+    const result = await fetchWord(data.query, false);
     if (result.suggestions.length) return { suggestions: result.suggestions.slice(0, 12) };
     const heads = Array.from(
       new Set(result.entries.map((e) => e.id.split(":")[0]!).filter(Boolean)),

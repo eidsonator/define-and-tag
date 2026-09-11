@@ -1,6 +1,29 @@
 import type { DictEntry } from "@/lib/dictionary.functions";
 
-export function EntryView({ entry }: { entry: DictEntry }) {
+export function EntryView({
+  entry,
+  onRelatedWordClick,
+}: {
+  entry: DictEntry;
+  onRelatedWordClick?: (word: string) => void;
+}) {
+  const synonyms = entry.synonyms ?? [];
+  const antonyms = entry.antonyms ?? [];
+
+  const relatedWords = (words: string[]) =>
+    words.map((word, index) => (
+      <span key={word}>
+        {index > 0 && ", "}
+        <button
+          type="button"
+          className="underline decoration-primary/40 underline-offset-2 hover:decoration-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={() => onRelatedWordClick?.(word)}
+        >
+          {word}
+        </button>
+      </span>
+    ));
+
   return (
     <article className="paper-panel rounded-lg p-6">
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -32,6 +55,23 @@ export function EntryView({ entry }: { entry: DictEntry }) {
           ),
         )}
       </ol>
+
+      {(synonyms.length > 0 || antonyms.length > 0) && (
+        <section className="mt-6 border-t border-border pt-4" aria-label="Related words">
+          {synonyms.length > 0 && (
+            <div>
+              <h3 className="font-display text-sm italic text-muted-foreground">Synonyms</h3>
+              <p className="mt-2 leading-relaxed text-primary">{relatedWords(synonyms)}</p>
+            </div>
+          )}
+          {antonyms.length > 0 && (
+            <div className={synonyms.length > 0 ? "mt-4" : ""}>
+              <h3 className="font-display text-sm italic text-muted-foreground">Antonyms</h3>
+              <p className="mt-2 leading-relaxed text-primary">{relatedWords(antonyms)}</p>
+            </div>
+          )}
+        </section>
+      )}
 
       {(entry.etymology || entry.date) && (
         <footer className="mt-6 border-t border-border pt-4 text-sm text-muted-foreground">

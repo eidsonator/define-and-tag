@@ -24,3 +24,14 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Dictionary API configuration
+
+Set these server-side environment variables before starting the app:
+
+```sh
+MERRIAM_WEBSTER_API_KEY=your_collegiate_dictionary_key
+MERRIAM_WEBSTER_THESAURUS_API_KEY=your_collegiate_thesaurus_key
+```
+
+The thesaurus key is optional. When it is configured, search results display synonyms and antonyms for entries Merriam-Webster can match; definitions continue to work if the thesaurus has no match or is unavailable.
