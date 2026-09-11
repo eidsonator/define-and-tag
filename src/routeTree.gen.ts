@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedListsIndexRouteImport } from './routes/_authenticated/lists.index'
+import { Route as AuthenticatedListsListIdRouteImport } from './routes/_authenticated/lists.$listId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,16 +35,31 @@ const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedListsIndexRoute = AuthenticatedListsIndexRouteImport.update({
+  id: '/lists/',
+  path: '/lists/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedListsListIdRoute =
+  AuthenticatedListsListIdRouteImport.update({
+    id: '/lists/$listId',
+    path: '/lists/$listId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/lists/$listId': typeof AuthenticatedListsListIdRoute
+  '/lists/': typeof AuthenticatedListsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/search': typeof AuthenticatedSearchRoute
+  '/lists/$listId': typeof AuthenticatedListsListIdRoute
+  '/lists': typeof AuthenticatedListsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,13 +67,22 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
+  '/_authenticated/lists/$listId': typeof AuthenticatedListsListIdRoute
+  '/_authenticated/lists/': typeof AuthenticatedListsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/search'
+  fullPaths: '/' | '/auth' | '/search' | '/lists/$listId' | '/lists/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/search'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/search'
+  to: '/' | '/auth' | '/search' | '/lists/$listId' | '/lists'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/search'
+    | '/_authenticated/lists/$listId'
+    | '/_authenticated/lists/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,15 +121,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/lists/': {
+      id: '/_authenticated/lists/'
+      path: '/lists'
+      fullPath: '/lists/'
+      preLoaderRoute: typeof AuthenticatedListsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/lists/$listId': {
+      id: '/_authenticated/lists/$listId'
+      path: '/lists/$listId'
+      fullPath: '/lists/$listId'
+      preLoaderRoute: typeof AuthenticatedListsListIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
+  AuthenticatedListsListIdRoute: typeof AuthenticatedListsListIdRoute
+  AuthenticatedListsIndexRoute: typeof AuthenticatedListsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
+  AuthenticatedListsListIdRoute: AuthenticatedListsListIdRoute,
+  AuthenticatedListsIndexRoute: AuthenticatedListsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
