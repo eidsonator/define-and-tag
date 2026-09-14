@@ -18,3 +18,14 @@ jobs:
           node-version: 24
       - run: npm install --ignore-scripts --package-lock=false
       - uses: pre-commit/action@v3.0.1
+
+  unit-tests:
+    name: Unit tests and coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npm install --ignore-scripts --package-lock=false
+      - run: npm run test:coverage

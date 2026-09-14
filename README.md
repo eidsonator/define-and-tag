@@ -49,6 +49,14 @@ Prettier and ESLint hooks may rewrite staged files; review and stage those
 changes before committing. To refresh third-party hook versions, run
 `pre-commit autoupdate` in a dedicated pull request.
 
+## Unit tests and coverage
+
+Run the unit suite locally with `npm test`. The CI coverage gate runs
+`npm run test:coverage` and requires 100% statements, branches, functions, and
+lines for the explicitly scoped core unit-test modules in `vitest.config.ts`.
+Add a module to that coverage scope when it gains unit tests so uncovered code
+cannot silently reduce the enforced baseline.
+
 ## Dictionary API configuration
 
 Set these server-side environment variables before starting the app:
