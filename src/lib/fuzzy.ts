@@ -10,6 +10,7 @@ export function fuzzyScore(candidate: string, query: string): number {
   let ci = 0;
   let score = 300;
   let streak = 0;
+  let matched = false;
   for (const ch of q) {
     const found = c.indexOf(ch, ci);
     if (found === -1) {
@@ -19,12 +20,13 @@ export function fuzzyScore(candidate: string, query: string): number {
       if (score <= 0) return 0;
       continue;
     }
+    matched = true;
     score += streak > 0 && found === ci ? 8 : 0;
     streak = found === ci ? streak + 1 : 0;
     score -= Math.min(found - ci, 10);
     ci = found + 1;
   }
-  return Math.max(score, 0);
+  return matched ? Math.max(score, 0) : 0;
 }
 
 export function fuzzyRank<T>(items: T[], query: string, key: (item: T) => string, limit = 8): T[] {
