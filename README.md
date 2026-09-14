@@ -25,6 +25,30 @@ npm ci
 npm run dev
 ```
 
+## Commit checks
+
+This project uses [pre-commit](https://pre-commit.com/) to catch formatting,
+lint, file-hygiene, merge-conflict, oversized-file, and private-key issues
+before a commit is created. The same checks run in GitHub Actions for every
+push and pull request.
+
+After installing the project dependencies, install the hook once per clone:
+
+```sh
+python3 -m pip install pre-commit
+pre-commit install
+```
+
+Run all checks on demand, including after changing the hook configuration:
+
+```sh
+pre-commit run --all-files
+```
+
+Prettier and ESLint hooks may rewrite staged files; review and stage those
+changes before committing. To refresh third-party hook versions, run
+`pre-commit autoupdate` in a dedicated pull request.
+
 ## Dictionary API configuration
 
 Set these server-side environment variables before starting the app:
@@ -65,18 +89,18 @@ behind preview auth).
 A saved word is unique per account and can belong to any number of lists (a
 `listIds` array), matching the app's multi-list model.
 
-| Method | Path              | Description                              |
-| ------ | ----------------- | ----------------------------------------- |
-| GET    | `/api/lists`      | List all word lists (with word counts)    |
-| POST   | `/api/lists`      | Create a list — body: `{ name }`          |
-| GET    | `/api/lists/:id`  | Get one list                              |
-| PATCH  | `/api/lists/:id`  | Rename a list — body: `{ name }`          |
-| DELETE | `/api/lists/:id`  | Delete a list (words that belonged only to it become unreachable, same as in the app) |
-| GET    | `/api/words`      | List saved words — optional `?listId=`, `?tag=`, `?q=` (search headword/note) |
-| POST   | `/api/words`      | Save a word — body: `{ listIds, headword, note?, tags?, entry? }`. Upserts by headword per account, and adds it to any new lists. |
-| GET    | `/api/words/:id`  | Get one saved word (includes `listIds`)   |
-| PATCH  | `/api/words/:id`  | Update a saved word — body: any of `{ note, tags, addListIds, removeListIds }`. Removing its last list deletes it. |
-| DELETE | `/api/words/:id`  | Delete a saved word. With `?listId=`, only removes it from that list (deleting it entirely if it was the last one); without it, deletes everywhere. |
+| Method | Path             | Description                                                                                                                                         |
+| ------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/lists`     | List all word lists (with word counts)                                                                                                              |
+| POST   | `/api/lists`     | Create a list — body: `{ name }`                                                                                                                    |
+| GET    | `/api/lists/:id` | Get one list                                                                                                                                        |
+| PATCH  | `/api/lists/:id` | Rename a list — body: `{ name }`                                                                                                                    |
+| DELETE | `/api/lists/:id` | Delete a list (words that belonged only to it become unreachable, same as in the app)                                                               |
+| GET    | `/api/words`     | List saved words — optional `?listId=`, `?tag=`, `?q=` (search headword/note)                                                                       |
+| POST   | `/api/words`     | Save a word — body: `{ listIds, headword, note?, tags?, entry? }`. Upserts by headword per account, and adds it to any new lists.                   |
+| GET    | `/api/words/:id` | Get one saved word (includes `listIds`)                                                                                                             |
+| PATCH  | `/api/words/:id` | Update a saved word — body: any of `{ note, tags, addListIds, removeListIds }`. Removing its last list deletes it.                                  |
+| DELETE | `/api/words/:id` | Delete a saved word. With `?listId=`, only removes it from that list (deleting it entirely if it was the last one); without it, deletes everywhere. |
 
 All requests need the `x-api-key` header. Example:
 
