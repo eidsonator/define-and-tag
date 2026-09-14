@@ -97,7 +97,10 @@ function parseEntry(raw: Unknown): DictEntry | null {
   const id = typeof meta?.["id"] === "string" ? (meta["id"] as string) : "";
   if (!id) return null;
   const hwi = raw["hwi"] as Unknown | undefined;
-  const hw = typeof hwi?.["hw"] === "string" ? (hwi["hw"] as string).replace(/\*/g, "\u00b7") : id.split(":")[0]!;
+  const hw =
+    typeof hwi?.["hw"] === "string"
+      ? (hwi["hw"] as string).replace(/\*/g, "\u00b7")
+      : id.split(":")[0]!;
   const prs = hwi?.["prs"];
   let pronunciation: string | null = null;
   if (Array.isArray(prs) && prs.length) {
@@ -208,7 +211,11 @@ async function fetchWord(word: string, includeRelatedWords = true): Promise<Look
 
 export const lookupWord = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { word: string }) => ({ word: String(data.word ?? "").trim().slice(0, 60) }))
+  .inputValidator((data: { word: string }) => ({
+    word: String(data.word ?? "")
+      .trim()
+      .slice(0, 60),
+  }))
   .handler(async ({ data }) => {
     if (!data.word) return { word: "", entries: [], suggestions: [] } satisfies LookupResult;
     return await fetchWord(data.word);
@@ -216,7 +223,11 @@ export const lookupWord = createServerFn({ method: "POST" })
 
 export const suggestWords = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { query: string }) => ({ query: String(data.query ?? "").trim().slice(0, 60) }))
+  .inputValidator((data: { query: string }) => ({
+    query: String(data.query ?? "")
+      .trim()
+      .slice(0, 60),
+  }))
   .handler(async ({ data }) => {
     if (data.query.length < 2) return { suggestions: [] as string[] };
     const result = await fetchWord(data.query, false);

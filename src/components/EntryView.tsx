@@ -37,23 +37,27 @@ export function EntryView({
       </header>
 
       <ol className="mt-5 space-y-4">
-        {(entry.senses.length ? entry.senses : entry.shortdefs.map((t) => ({ label: "", text: t, examples: [] }))).map(
-          (sense, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="mt-0.5 min-w-6 font-display text-sm text-muted-foreground">
-                {sense.label || i + 1}
-              </span>
-              <div className="flex-1">
-                <p className="leading-relaxed">{sense.text}</p>
-                {sense.examples.map((ex, j) => (
-                  <p key={j} className="mt-1 border-l-2 border-accent pl-3 text-sm italic text-muted-foreground">
-                    {ex}
-                  </p>
-                ))}
-              </div>
-            </li>
-          ),
-        )}
+        {(entry.senses.length
+          ? entry.senses
+          : entry.shortdefs.map((t) => ({ label: "", text: t, examples: [] }))
+        ).map((sense, i) => (
+          <li key={i} className="flex gap-3">
+            <span className="mt-0.5 min-w-6 font-display text-sm text-muted-foreground">
+              {sense.label || i + 1}
+            </span>
+            <div className="flex-1">
+              <p className="leading-relaxed">{sense.text}</p>
+              {sense.examples.map((ex, j) => (
+                <p
+                  key={j}
+                  className="mt-1 border-l-2 border-accent pl-3 text-sm italic text-muted-foreground"
+                >
+                  {ex}
+                </p>
+              ))}
+            </div>
+          </li>
+        ))}
       </ol>
 
       {(synonyms.length > 0 || antonyms.length > 0) && (

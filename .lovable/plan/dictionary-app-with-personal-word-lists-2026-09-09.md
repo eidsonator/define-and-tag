@@ -5,22 +5,27 @@ A warm, book-like dictionary app. People sign in with their own account, look wo
 ## What you get
 
 **Sign in**
+
 - Email + password sign up and sign in, each person gets a private account.
 - Everything below is behind the login; visitors see a welcome page with a sign-in button.
 
 **Look up a word**
+
 - One prominent search bar. As you type, close matches appear underneath, forgiving of typos and partial spellings (suggestions come from Merriam-Webster's own "did you mean" results plus fuzzy matching).
 - Picking a suggestion (or pressing enter) shows the entry: pronunciation, part of speech, all senses, example sentences, and word origin when available.
 
 **Save to a list**
+
 - A "Save word" button on every entry, with a picker for which list it goes into (or create a new list right there).
 - Multiple lists, each with a name; rename and delete supported.
 
 **Tags and notes**
+
 - Any saved word can carry free-form tags and a personal note.
 - Filter a list by tag; search across saved words.
 
 **Look and feel**
+
 - Warm literary: serif headings, cream paper tones, generous margins, quiet ink-colored accents.
 
 ## What I need from you
