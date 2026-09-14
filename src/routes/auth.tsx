@@ -141,7 +141,8 @@ function AuthPage() {
 
               <div className="mt-6 space-y-4">
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
+                  <span className="h-px flex-1 bg-border" /> or{" "}
+                  <span className="h-px flex-1 bg-border" />
                 </div>
                 <Button variant="outline" className="w-full" onClick={google} type="button">
                   Continue with Google

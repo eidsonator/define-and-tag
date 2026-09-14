@@ -20,21 +20,21 @@ export const Route = createFileRoute("/_authenticated/search")({
       { title: "Look up a word | Lexicon" },
       {
         name: "description",
-        content: "Search Merriam-Webster definitions with typo-tolerant suggestions and save words to your lists.",
+        content:
+          "Search Merriam-Webster definitions with typo-tolerant suggestions and save words to your lists.",
       },
       { property: "og:title", content: "Look up a word | Lexicon" },
       {
         property: "og:description",
-        content: "Search Merriam-Webster definitions with typo-tolerant suggestions and save words to your lists.",
+        content:
+          "Search Merriam-Webster definitions with typo-tolerant suggestions and save words to your lists.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: SearchPage,
-  errorComponent: ({ error }) => (
-    <p className="text-sm text-destructive">{error.message}</p>
-  ),
+  errorComponent: ({ error }) => <p className="text-sm text-destructive">{error.message}</p>,
 });
 
 function SearchPage() {
@@ -48,7 +48,9 @@ function SearchPage() {
   const [debounced, setDebounced] = useState("");
   const [word, setWord] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [saveFor, setSaveFor] = useState<{ headword: string; entry: DictEntry | null } | null>(null);
+  const [saveFor, setSaveFor] = useState<{ headword: string; entry: DictEntry | null } | null>(
+    null,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -56,7 +58,10 @@ function SearchPage() {
     return () => clearTimeout(id);
   }, [term]);
 
-  const listsQuery = useQuery({ queryKey: ["lists"], queryFn: () => fetchLists({ data: undefined }) });
+  const listsQuery = useQuery({
+    queryKey: ["lists"],
+    queryFn: () => fetchLists({ data: undefined }),
+  });
   const savedQuery = useQuery({
     queryKey: ["saved", "all"],
     queryFn: () => fetchSaved({ data: { listId: null } }),
@@ -161,7 +166,9 @@ function SearchPage() {
       )}
 
       {entryQuery.error && (
-        <p className="text-center text-sm text-destructive">{(entryQuery.error as Error).message}</p>
+        <p className="text-center text-sm text-destructive">
+          {(entryQuery.error as Error).message}
+        </p>
       )}
 
       {result && !entryQuery.isFetching && (
