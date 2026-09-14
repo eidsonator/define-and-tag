@@ -40,7 +40,10 @@ function ListsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
 
-  const listsQuery = useQuery({ queryKey: ["lists"], queryFn: () => fetchLists({ data: undefined }) });
+  const listsQuery = useQuery({
+    queryKey: ["lists"],
+    queryFn: () => fetchLists({ data: undefined }),
+  });
 
   const invalidate = () => queryClient.invalidateQueries();
 
