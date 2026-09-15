@@ -37,10 +37,10 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/search", replace: true });
+      if (data.session) navigate({ to: "/search", search: { word: "" }, replace: true });
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate({ to: "/search", replace: true });
+      if (session) navigate({ to: "/search", search: { word: "" }, replace: true });
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
@@ -78,7 +78,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/search", replace: true });
+    navigate({ to: "/search", search: { word: "" }, replace: true });
   }
 
   return (

@@ -29,11 +29,15 @@ function AuthedLayout() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-paper">
         <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-3">
-          <Link to="/search" className="mr-auto font-display text-xl font-semibold tracking-tight">
+          <Link
+            to="/search"
+            search={{ word: "" }}
+            className="mr-auto font-display text-xl font-semibold tracking-tight"
+          >
             Lexicon
           </Link>
           <Button asChild variant="ghost" size="sm">
-            <Link to="/search">
+            <Link to="/search" search={{ word: "" }}>
               <Search className="size-4" /> Look up
             </Link>
           </Button>

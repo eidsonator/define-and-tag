@@ -13,7 +13,7 @@ import { fuzzyRank } from "@/lib/fuzzy";
 
 export const Route = createFileRoute("/_authenticated/search")({
   validateSearch: (search: Record<string, unknown>) => ({
-    word: typeof search.word === "string" ? search.word.trim().slice(0, 60) : "",
+    word: typeof search["word"] === "string" ? search["word"].trim().slice(0, 60) : "",
   }),
   head: () => ({
     meta: [

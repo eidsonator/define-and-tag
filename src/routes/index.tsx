@@ -48,7 +48,7 @@ function Landing() {
 
         <div className="mt-10 flex gap-3">
           {signedIn ? (
-            <Button size="lg" onClick={() => navigate({ to: "/search" })}>
+            <Button size="lg" onClick={() => navigate({ to: "/search", search: { word: "" } })}>
               Open your dictionary
             </Button>
           ) : (
