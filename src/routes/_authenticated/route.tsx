@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BookMarked, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { AppVersion } from "@/components/AppVersion";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -26,7 +27,7 @@ function AuthedLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-paper">
         <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-3">
           <Link
@@ -51,9 +52,12 @@ function AuthedLayout() {
           </Button>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
         <Outlet />
       </main>
+      <footer className="mx-auto w-full max-w-4xl px-4 py-4 text-center">
+        <AppVersion />
+      </footer>
     </div>
   );
 }

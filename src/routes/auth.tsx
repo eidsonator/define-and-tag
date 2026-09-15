@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { AppVersion } from "@/components/AppVersion";
 
 function safeNext(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -173,6 +174,9 @@ function AuthPage() {
             </Tabs>
           )}
         </div>
+        <footer className="mt-6 text-center">
+          <AppVersion />
+        </footer>
       </div>
     </div>
   );

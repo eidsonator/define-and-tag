@@ -7,13 +7,14 @@ import listWordsTool from "./tools/list-words";
 import saveWordTool from "./tools/save-word";
 import updateWordTool from "./tools/update-word";
 import deleteWordTool from "./tools/delete-word";
+import { APP_VERSION } from "../app-version";
 
 const projectRef = import.meta.env["VITE_SUPABASE_PROJECT_ID"] ?? "project-ref-unset";
 
 export default defineMcp({
   name: "word-keeper-pro",
   title: "Word Keeper Pro",
-  version: "1.0.0",
+  version: APP_VERSION,
   instructions:
     "Tools for the Word Keeper Pro dictionary app. Use list_lists, create_list, rename_list and delete_list to manage the signed-in user's word lists, and list_words, save_word, update_word and delete_word to manage their saved words, notes and tags.",
   auth: auth.oauth.issuer({
