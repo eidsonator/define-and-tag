@@ -9,6 +9,7 @@ import {
   updateListRaw,
   updateWordRaw,
 } from "@/lib/words-api";
+import { APP_VERSION } from "./app-version";
 
 const PROTOCOL_VERSION = "2025-06-18";
 const SUPPORTED_PROTOCOL_VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"];
@@ -256,7 +257,7 @@ async function handleMessage(message: JsonRpcRequest) {
           ? requested
           : PROTOCOL_VERSION,
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "word-keeper-pro", title: "Word Keeper Pro", version: "1.0.0" },
+        serverInfo: { name: "word-keeper-pro", title: "Word Keeper Pro", version: APP_VERSION },
         instructions:
           "Tools for the Word Keeper Pro dictionary app. Use list_lists/create_list/rename_list/delete_list to manage word lists, and list_words/save_word/update_word/delete_word to manage saved words.",
       });

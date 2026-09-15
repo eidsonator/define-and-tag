@@ -32,3 +32,6 @@ the project adopted a changelog. Earlier commits were not versioned or tagged.
 - Legacy databases that lack the old word-list index can complete the
   multi-list migration safely.
 - Fuzzy matching returns no result when a query has no matching characters.
+
+[unreleased]: https://github.com/eidsonator/define-and-tag/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/eidsonator/define-and-tag/releases/tag/v0.1.0
