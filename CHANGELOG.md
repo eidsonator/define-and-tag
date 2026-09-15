@@ -7,6 +7,15 @@ and future releases will follow [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-15
+
+### Added
+
+- Unique, case-insensitive usernames for user profiles.
+- Username selection during password sign-up and a profile page for changing it.
+- Username display in authenticated navigation.
+- Database migration and validation tests for usernames.
+
 ## [0.1.0] - 2026-09-15
 
 This first release entry retrospectively records the notable changes made before
@@ -33,5 +42,6 @@ the project adopted a changelog. Earlier commits were not versioned or tagged.
   multi-list migration safely.
 - Fuzzy matching returns no result when a query has no matching characters.
 
-[unreleased]: https://github.com/eidsonator/define-and-tag/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/eidsonator/define-and-tag/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/eidsonator/define-and-tag/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/eidsonator/define-and-tag/releases/tag/v0.1.0
