@@ -40,7 +40,7 @@ export const Route = createFileRoute("/_authenticated/search")({
 });
 
 function SearchPage() {
-  const { word: requestedWord } = Route.useSearch();
+  const requestedWord = Route.useSearch().word ?? "";
   const lookup = useServerFn(lookupWord);
   const suggest = useServerFn(suggestWords);
   const fetchLists = useServerFn(getLists);
