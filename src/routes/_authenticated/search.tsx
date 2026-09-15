@@ -12,9 +12,11 @@ import { getLists, getSavedWords } from "@/lib/words.functions";
 import { fuzzyRank } from "@/lib/fuzzy";
 
 export const Route = createFileRoute("/_authenticated/search")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    word: typeof search.word === "string" ? search.word.trim().slice(0, 60) : "",
-  }),
+  validateSearch: (search: Record<string, unknown>): { word?: string } => {
+    const raw = search["word"];
+    const word = typeof raw === "string" ? raw.trim().slice(0, 60) : "";
+    return word ? { word } : {};
+  },
   head: () => ({
     meta: [
       { title: "Look up a word | Lexicon" },
