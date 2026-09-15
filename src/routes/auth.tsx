@@ -40,20 +40,28 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const next = Route.useSearch().next;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
   useEffect(() => {
+    function go() {
+      if (next) {
+        window.location.replace(next);
+        return;
+      }
+      navigate({ to: "/search", replace: true });
+    }
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/search", replace: true });
+      if (data.session) go();
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) navigate({ to: "/search", replace: true });
+      if (session) go();
     });
     return () => sub.subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, next]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -69,7 +77,7 @@ function AuthPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: next ? window.location.origin + next : window.location.origin },
     });
     setBusy(false);
     if (error) {
@@ -81,15 +89,20 @@ function AuthPage() {
 
   async function google() {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+      redirect_uri: next ? window.location.origin + next : window.location.origin,
     });
     if (result.error) {
       toast.error("Google sign-in didn't work. Try again.");
       return;
     }
     if (result.redirected) return;
+    if (next) {
+      window.location.replace(next);
+      return;
+    }
     navigate({ to: "/search", replace: true });
   }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
