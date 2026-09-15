@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as ApiListsRouteImport } from './routes/api/lists'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as ApiWordsRouteImport } from './routes/api/words'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedListsIndexRouteImport } from './routes/_authenticated/lists.index'
 import { Route as AuthenticatedListsListIdRouteImport } from './routes/_authenticated/lists.$listId'
 import { Route as ApiListsIdRouteImport } from './routes/api/lists.$id'
@@ -40,6 +43,17 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -58,6 +72,11 @@ const ApiMcpRoute = ApiMcpRouteImport.update({
 const ApiWordsRoute = ApiWordsRouteImport.update({
   id: '/api/words',
   path: '/api/words',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedListsIndexRoute = AuthenticatedListsIndexRouteImport.update({
@@ -110,10 +129,13 @@ const ApiPublicWordsIdRoute = ApiPublicWordsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/search': typeof AuthenticatedSearchRoute
   '/api/lists': typeof ApiListsRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/api/words': typeof ApiWordsRouteWithChildren
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/lists/$listId': typeof AuthenticatedListsListIdRoute
   '/api/lists/$id': typeof ApiListsIdRoute
   '/api/public/lists': typeof ApiPublicListsRouteWithChildren
@@ -127,10 +149,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/search': typeof AuthenticatedSearchRoute
   '/api/lists': typeof ApiListsRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/api/words': typeof ApiWordsRouteWithChildren
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/lists/$listId': typeof AuthenticatedListsListIdRoute
   '/api/lists/$id': typeof ApiListsIdRoute
   '/api/public/lists': typeof ApiPublicListsRouteWithChildren
@@ -146,10 +171,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/api/lists': typeof ApiListsRouteWithChildren
   '/api/mcp': typeof ApiMcpRoute
   '/api/words': typeof ApiWordsRouteWithChildren
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_authenticated/lists/$listId': typeof AuthenticatedListsListIdRoute
   '/api/lists/$id': typeof ApiListsIdRoute
   '/api/public/lists': typeof ApiPublicListsRouteWithChildren
@@ -165,10 +193,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
     | '/search'
     | '/api/lists'
     | '/api/mcp'
     | '/api/words'
+    | '/.lovable/oauth/consent'
     | '/lists/$listId'
     | '/api/lists/$id'
     | '/api/public/lists'
@@ -182,10 +213,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
     | '/search'
     | '/api/lists'
     | '/api/mcp'
     | '/api/words'
+    | '/.lovable/oauth/consent'
     | '/lists/$listId'
     | '/api/lists/$id'
     | '/api/public/lists'
@@ -200,10 +234,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/search'
     | '/api/lists'
     | '/api/mcp'
     | '/api/words'
+    | '/.lovable/oauth/consent'
     | '/_authenticated/lists/$listId'
     | '/api/lists/$id'
     | '/api/public/lists'
@@ -219,9 +256,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  McpRoute: typeof McpRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiListsRoute: typeof ApiListsRouteWithChildren
   ApiMcpRoute: typeof ApiMcpRoute
   ApiWordsRoute: typeof ApiWordsRouteWithChildren
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicListsRoute: typeof ApiPublicListsRouteWithChildren
   ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicWordsRoute: typeof ApiPublicWordsRouteWithChildren
@@ -250,6 +290,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/search': {
       id: '/_authenticated/search'
       path: '/search'
@@ -276,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/api/words'
       fullPath: '/api/words'
       preLoaderRoute: typeof ApiWordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/lists/': {
@@ -411,9 +472,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  McpRoute: McpRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiListsRoute: ApiListsRouteWithChildren,
   ApiMcpRoute: ApiMcpRoute,
   ApiWordsRoute: ApiWordsRouteWithChildren,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicListsRoute: ApiPublicListsRouteWithChildren,
   ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicWordsRoute: ApiPublicWordsRouteWithChildren,
