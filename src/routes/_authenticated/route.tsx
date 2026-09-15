@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { BookMarked, Search } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { BookMarked, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { AppVersion } from "@/components/AppVersion";
@@ -18,6 +18,18 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthedLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = Route.useRouteContext();
+  const { data: username = null } = useQuery({
+    queryKey: ["profile", user.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data?.username ?? null;
+    },
+  });
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -45,6 +57,12 @@ function AuthedLayout() {
           <Button asChild variant="ghost" size="sm">
             <Link to="/lists">
               <BookMarked className="size-4" /> Lists
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/profile">
+              <UserRound className="size-4" />
+              <span className="hidden sm:inline">{username ? `@${username}` : "Profile"}</span>
             </Link>
           </Button>
           <Button variant="outline" size="sm" onClick={signOut}>
