@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookMarked, Search } from "lucide-react";
+import { BookMarked, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +40,11 @@ function AuthedLayout() {
           <Button asChild variant="ghost" size="sm">
             <Link to="/lists">
               <BookMarked className="size-4" /> Lists
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/profile">
+              <UserRound className="size-4" /> Profile
             </Link>
           </Button>
           <Button variant="outline" size="sm" onClick={signOut}>
