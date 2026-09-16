@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { BookMarked, Search, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { AppVersion } from "@/components/AppVersion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -49,7 +48,7 @@ function Landing() {
 
         <div className="mt-10 flex gap-3">
           {signedIn ? (
-            <Button size="lg" onClick={() => navigate({ to: "/search", search: { word: "" } })}>
+            <Button size="lg" onClick={() => navigate({ to: "/search" })}>
               Open your dictionary
             </Button>
           ) : (
@@ -75,9 +74,6 @@ function Landing() {
             Add your own context so the word actually sticks.
           </Feature>
         </div>
-        <footer className="mt-12">
-          <AppVersion />
-        </footer>
       </div>
     </div>
   );

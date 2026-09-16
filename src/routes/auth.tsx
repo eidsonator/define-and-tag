@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { AppVersion } from "@/components/AppVersion";
-import { normalizeUsername, usernameError } from "@/lib/username";
 
 function safeNext(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -45,7 +43,6 @@ function AuthPage() {
   const next = Route.useSearch().next;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
@@ -76,19 +73,11 @@ function AuthPage() {
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
-    const usernameMessage = usernameError(username);
-    if (usernameMessage) {
-      toast.error(usernameMessage);
-      return;
-    }
     setBusy(true);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: next ? window.location.origin + next : window.location.origin,
-        data: { username: normalizeUsername(username) },
-      },
+      options: { emailRedirectTo: next ? window.location.origin + next : window.location.origin },
     });
     setBusy(false);
     if (error) {
@@ -113,6 +102,7 @@ function AuthPage() {
     }
     navigate({ to: "/search", replace: true });
   }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
@@ -160,21 +150,6 @@ function AuthPage() {
 
               <TabsContent value="signup">
                 <form onSubmit={signUp} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      required
-                      autoComplete="username"
-                      maxLength={32}
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="word_keeper"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      3–32 lowercase letters, numbers, underscores, or hyphens.
-                    </p>
-                  </div>
                   <Fields
                     email={email}
                     password={password}
@@ -199,9 +174,6 @@ function AuthPage() {
             </Tabs>
           )}
         </div>
-        <footer className="mt-6 text-center">
-          <AppVersion />
-        </footer>
       </div>
     </div>
   );

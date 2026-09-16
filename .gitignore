@@ -9,8 +9,6 @@ lerna-debug.log*
 
 node_modules
 coverage
-playwright-report
-test-results
 dist
 dist-ssr
 .output

@@ -6,13 +6,6 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
-import { readFileSync } from "node:fs";
-
-const { version } = JSON.parse(
-  readFileSync(new URL("./package.json", import.meta.url), "utf8"),
-) as {
-  version: string;
-};
 
 export default defineConfig({
   tanstackStart: {
@@ -21,9 +14,6 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    define: {
-      __APP_VERSION__: JSON.stringify(version),
-    },
     plugins: [mcpPlugin()],
   },
 });
