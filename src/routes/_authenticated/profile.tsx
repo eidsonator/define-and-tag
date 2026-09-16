@@ -1,16 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { KeyRound, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
 import { createApiKey, deleteApiKey, getApiKeys, type ApiKey } from "@/lib/api-keys.functions";
+import { normalizeUsername, usernameError } from "@/lib/username";
 
-export const Route = createFileRoute("/_authenticated/profile")({ component: ProfilePage });
+export const Route = createFileRoute("/_authenticated/profile")({
+  head: () => ({ meta: [{ title: "Profile | Lexicon" }] }),
+  component: ProfilePage,
+});
 
 function ProfilePage() {
+  const { user } = Route.useRouteContext();
+  const queryClient = useQueryClient();
   const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [username, setUsername] = useState("");
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [savingUsername, setSavingUsername] = useState(false);
   const [name, setName] = useState("MCP key");
   const [newKey, setNewKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -24,7 +36,42 @@ function ProfilePage() {
     }
   }
 
-  useEffect(() => void refresh(), []);
+  useEffect(() => {
+    void refresh();
+    async function loadProfile() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (error) toast.error("Your profile could not be loaded.");
+      else setUsername(data?.username ?? "");
+      setProfileLoading(false);
+    }
+    void loadProfile();
+  }, [user.id]);
+
+  async function saveUsername(event: React.FormEvent) {
+    event.preventDefault();
+    const errorMessage = usernameError(username);
+    if (errorMessage) return toast.error(errorMessage);
+    setSavingUsername(true);
+    const normalized = normalizeUsername(username);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ username: normalized })
+      .eq("id", user.id);
+    setSavingUsername(false);
+    if (error) {
+      toast.error(
+        error.code === "23505" ? "That username is already taken." : "Profile update failed.",
+      );
+      return;
+    }
+    setUsername(normalized);
+    queryClient.setQueryData(["profile", user.id], normalized);
+    toast.success("Username updated.");
+  }
 
   async function create() {
     setBusy(true);
@@ -55,9 +102,38 @@ function ProfilePage() {
       <div>
         <h1 className="font-display text-3xl font-semibold">Profile</h1>
         <p className="mt-1 text-muted-foreground">
-          Manage personal access for the REST API and MCP server.
+          Manage your public name and personal API access.
         </p>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Username</CardTitle>
+          <CardDescription>Choose the name shown in Lexicon.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={saveUsername} className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="profile-username">Username</Label>
+              <Input
+                id="profile-username"
+                required
+                autoComplete="username"
+                disabled={profileLoading || savingUsername}
+                maxLength={32}
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="word_keeper"
+              />
+              <p className="text-xs text-muted-foreground">
+                3–32 lowercase letters, numbers, underscores, or hyphens.
+              </p>
+            </div>
+            <Button type="submit" disabled={profileLoading || savingUsername}>
+              {savingUsername ? "Saving…" : "Save username"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
