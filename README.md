@@ -74,19 +74,13 @@ included `.env` contains the public Supabase configuration used by the app; if
 you connect a different Supabase project, update its `SUPABASE_*` and
 `VITE_SUPABASE_*` values before starting the server.
 
-## API and MCP (full read/write access)
+## API and MCP (personal full read/write access)
 
 The app exposes a REST API and an MCP server for word lists and saved words,
 so external scripts or an MCP-capable client (like Claude) can read and write
-your data directly. Both are gated by a shared secret API key — set these two
-values as secrets in Lovable Cloud (Project Settings → Secrets), not in `.env`:
-
-- `WORDKEEPER_API_KEY` — any long random string; sent by clients as the
-  `x-api-key` header (or `Authorization: Bearer <key>`).
-- `WORDKEEPER_OWNER_ID` — the Supabase `auth.users.id` (UUID) of your account.
-  New lists/words created through the API are attached to this user. Find it
-  in the Supabase dashboard under Authentication → Users, or by running
-  `select id from auth.users where email = '<your email>';` in the SQL editor.
+your data directly. Each account creates its own key at **Profile → Create API
+key**. The full key is displayed once only; the database keeps only its SHA-256
+hash. Revoke a key from Profile immediately if it is exposed.
 
 Every endpoint exists at both `/api/...` and `/api/public/...` (identical
 handlers — the `/api/public/...` path is there for platforms that gate `/api`
@@ -114,10 +108,10 @@ All requests need the `x-api-key` header. Example:
 
 ```sh
 curl https://define-and-tag.lovable.app/api/lists \
-  -H "x-api-key: $WORDKEEPER_API_KEY"
+  -H "x-api-key: <your-personal-api-key>"
 
 curl -X POST https://define-and-tag.lovable.app/api/words \
-  -H "x-api-key: $WORDKEEPER_API_KEY" \
+  -H "x-api-key: <your-personal-api-key>" \
   -H "content-type: application/json" \
   -d '{"listIds":["<list-id>"],"headword":"ineffable","note":"too great for words","tags":["philosophy"]}'
 ```
@@ -131,7 +125,10 @@ authenticated the same way with `x-api-key`. It exposes these tools:
 
 To connect it as an MCP server (e.g. in Claude Code or Claude Desktop), add it
 as a remote HTTP server pointing at `/api/mcp` with the `x-api-key` header set
-to your `WORDKEEPER_API_KEY`.
+to the personal key created on your Profile page.
+
+The Lovable-managed `/mcp` endpoint is separate and uses Supabase OAuth; use
+`/api/mcp` when connecting with a Profile API key.
 
 The implementation lives in `src/lib/words-api.ts` (REST + shared data logic)
 and `src/lib/mcp-api.ts` (the JSON-RPC MCP layer), wired up as TanStack Start

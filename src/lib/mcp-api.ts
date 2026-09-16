@@ -173,47 +173,53 @@ function toolError(message: string) {
   return { content: [{ type: "text", text: message }], isError: true };
 }
 
-async function callTool(name: string, args: Record<string, unknown>) {
+async function callTool(name: string, args: Record<string, unknown>, userId: string) {
   switch (name) {
     case "list_lists": {
-      const result = await listListsRaw();
+      const result = await listListsRaw(userId);
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
     case "create_list": {
-      const result = await createListRaw({ name: args["name"] });
+      const result = await createListRaw({ name: args["name"] }, userId);
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
     case "rename_list": {
       const id = typeof args["id"] === "string" ? args["id"] : "";
-      const result = await updateListRaw({ name: args["name"] }, id);
+      const result = await updateListRaw({ name: args["name"] }, id, userId);
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
     case "delete_list": {
       const id = typeof args["id"] === "string" ? args["id"] : "";
-      const result = await deleteListRaw(id);
+      const result = await deleteListRaw(id, userId);
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
     case "list_words": {
-      const result = await listWordsRaw({
-        listId: typeof args["listId"] === "string" ? args["listId"] : undefined,
-        tag: typeof args["tag"] === "string" ? args["tag"] : undefined,
-        q: typeof args["q"] === "string" ? args["q"] : undefined,
-      });
+      const result = await listWordsRaw(
+        {
+          listId: typeof args["listId"] === "string" ? args["listId"] : undefined,
+          tag: typeof args["tag"] === "string" ? args["tag"] : undefined,
+          q: typeof args["q"] === "string" ? args["q"] : undefined,
+        },
+        userId,
+      );
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
     case "save_word": {
-      const result = await createWordRaw({
-        listIds: args["listIds"],
-        headword: args["headword"],
-        note: args["note"],
-        tags: args["tags"],
-        entry: args["entry"] ?? null,
-      });
+      const result = await createWordRaw(
+        {
+          listIds: args["listIds"],
+          headword: args["headword"],
+          note: args["note"],
+          tags: args["tags"],
+          entry: args["entry"] ?? null,
+        },
+        userId,
+      );
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
@@ -227,6 +233,7 @@ async function callTool(name: string, args: Record<string, unknown>) {
           removeListIds: args["removeListIds"],
         },
         id,
+        userId,
       );
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
@@ -234,7 +241,7 @@ async function callTool(name: string, args: Record<string, unknown>) {
     case "delete_word": {
       const id = typeof args["id"] === "string" ? args["id"] : "";
       const listId = typeof args["listId"] === "string" ? args["listId"] : undefined;
-      const result = await deleteWordRaw(id, listId);
+      const result = await deleteWordRaw(id, userId, listId);
       if ("error" in result) return toolError(result.error);
       return toolText(result, result as unknown as Record<string, unknown>);
     }
@@ -243,7 +250,7 @@ async function callTool(name: string, args: Record<string, unknown>) {
   }
 }
 
-async function handleMessage(message: JsonRpcRequest) {
+async function handleMessage(message: JsonRpcRequest, userId: string) {
   const id = message.id ?? null;
   const method = message.method ?? "";
   const params = (message.params ?? {}) as Record<string, unknown>;
@@ -269,7 +276,7 @@ async function handleMessage(message: JsonRpcRequest) {
       const name = String(params["name"] ?? "");
       const args = (params["arguments"] ?? {}) as Record<string, unknown>;
       try {
-        return rpcResult(id, await callTool(name, args));
+        return rpcResult(id, await callTool(name, args, userId));
       } catch (error) {
         return rpcResult(id, toolError(error instanceof Error ? error.message : String(error)));
       }
@@ -280,8 +287,8 @@ async function handleMessage(message: JsonRpcRequest) {
 }
 
 export async function handleMcpPost(request: Request): Promise<Response> {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
 
   const accept = request.headers.get("accept") ?? "";
   if (accept && !accept.includes("application/json") && !accept.includes("*/*")) {
@@ -306,7 +313,7 @@ export async function handleMcpPost(request: Request): Promise<Response> {
   for (const message of messages) {
     // Notifications (no id) get no response body.
     if (message.id === undefined || message.id === null) continue;
-    responses.push(await handleMessage(message));
+    responses.push(await handleMessage(message, principal.userId));
   }
 
   if (responses.length === 0) return new Response(null, { status: 202 });
@@ -318,15 +325,15 @@ export async function handleMcpPost(request: Request): Promise<Response> {
   });
 }
 
-export function handleMcpGet(request: Request): Response {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+export async function handleMcpGet(request: Request): Promise<Response> {
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   // Stateless server: no server-initiated SSE stream.
   return new Response("Method Not Allowed", { status: 405, headers: { allow: "POST, DELETE" } });
 }
 
-export function handleMcpDelete(request: Request): Response {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+export async function handleMcpDelete(request: Request): Promise<Response> {
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   return new Response(null, { status: 204 });
 }

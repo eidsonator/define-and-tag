@@ -5,9 +5,9 @@ import { handleMcpDelete, handleMcpGet, handleMcpPost } from "@/lib/mcp-api";
 export const Route = createFileRoute("/api/mcp")({
   server: {
     handlers: {
-      GET: async ({ request }) => handleMcpGet(request),
+      GET: async ({ request }) => await handleMcpGet(request),
       POST: async ({ request }) => handleMcpPost(request),
-      DELETE: async ({ request }) => handleMcpDelete(request),
+      DELETE: async ({ request }) => await handleMcpDelete(request),
     },
   },
 });

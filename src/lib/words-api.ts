@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { DictEntry } from "./dictionary.functions";
+import { hashApiKey } from "./api-keys.functions";
 
 const listNameSchema = z.string().trim().min(1, "name is required").max(60);
 
@@ -44,30 +45,25 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function timingSafeEqual(a: string, b: string) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
+export type ApiPrincipal = { userId: string };
 
-export function checkApiKey(request: Request): Response | null {
-  const expected = process.env["WORDKEEPER_API_KEY"];
-  if (!expected) return json({ error: "API key is not configured on the server" }, 500);
+export async function checkApiKey(request: Request): Promise<ApiPrincipal | Response> {
   const provided =
     request.headers.get("x-api-key") ??
     request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
     "";
-  if (!provided || !timingSafeEqual(provided, expected)) {
+  if (!provided) {
     return json({ error: "Unauthorized" }, 401);
   }
-  return null;
-}
-
-function ownerIdOrError(): { ownerId: string } | { error: string } {
-  const ownerId = process.env["WORDKEEPER_OWNER_ID"];
-  if (!ownerId) return { error: "WORDKEEPER_OWNER_ID is not configured on the server" };
-  return { ownerId };
+  const db = await admin();
+  const { data, error } = await db
+    .from("api_keys")
+    .select("id, user_id")
+    .eq("key_hash", await hashApiKey(provided))
+    .maybeSingle();
+  if (error || !data) return json({ error: "Unauthorized" }, 401);
+  await db.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("id", data.id);
+  return { userId: data.user_id };
 }
 
 async function admin() {
@@ -93,13 +89,14 @@ function compact<T extends Record<string, unknown>>(
 
 // ---------- Lists ----------
 
-export async function listListsRaw(): Promise<
-  { data: unknown[]; count: number } | { error: string }
-> {
+export async function listListsRaw(
+  userId: string,
+): Promise<{ data: unknown[]; count: number } | { error: string }> {
   const db = await admin();
   const { data, error } = await db
     .from("word_lists")
     .select("id, name, created_at, saved_word_lists(count)")
+    .eq("user_id", userId)
     .order("created_at", { ascending: true });
   if (error) return { error: error.message };
   const rows = (data ?? []).map((row) => {
@@ -115,26 +112,24 @@ export async function listListsRaw(): Promise<
 }
 
 export async function listLists(request: Request) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
-  const result = await listListsRaw();
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
+  const result = await listListsRaw(principal.userId);
   if ("error" in result) return json({ error: result.error }, 500);
   return json(result);
 }
 
 export async function createListRaw(
   input: unknown,
+  userId: string,
 ): Promise<{ data: unknown } | { error: string }> {
   const parsed = createListSchema.safeParse(input);
   if (!parsed.success) return { error: `Invalid input: ${JSON.stringify(parsed.error.flatten())}` };
 
-  const owner = ownerIdOrError();
-  if ("error" in owner) return owner;
-
   const db = await admin();
   const { data, error } = await db
     .from("word_lists")
-    .insert({ name: parsed.data.name, user_id: owner.ownerId })
+    .insert({ name: parsed.data.name, user_id: userId })
     .select("id, name, created_at")
     .single();
   if (error) return { error: error.message };
@@ -142,9 +137,9 @@ export async function createListRaw(
 }
 
 export async function createList(request: Request) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
-  const result = await createListRaw(await parseBody(request));
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
+  const result = await createListRaw(await parseBody(request), principal.userId);
   if ("error" in result) {
     const status = result.error.startsWith("Invalid input") ? 400 : 500;
     return json({ error: result.error }, status);
@@ -153,14 +148,15 @@ export async function createList(request: Request) {
 }
 
 export async function getList(request: Request, id: string) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   if (!uuidSchema.safeParse(id).success) return json({ error: "Invalid id" }, 400);
   const db = await admin();
   const { data, error } = await db
     .from("word_lists")
     .select("id, name, created_at, saved_word_lists(count)")
     .eq("id", id)
+    .eq("user_id", principal.userId)
     .maybeSingle();
   if (error) return json({ error: error.message }, 500);
   if (!data) return json({ error: "Not found" }, 404);
@@ -178,6 +174,7 @@ export async function getList(request: Request, id: string) {
 export async function updateListRaw(
   input: unknown,
   id: string,
+  userId: string,
 ): Promise<{ data: unknown } | { error: string }> {
   const parsed = updateListSchema.safeParse(input);
   if (!parsed.success) return { error: `Invalid input: ${JSON.stringify(parsed.error.flatten())}` };
@@ -187,6 +184,7 @@ export async function updateListRaw(
     .from("word_lists")
     .update({ name: parsed.data.name })
     .eq("id", id)
+    .eq("user_id", userId)
     .select("id, name, created_at")
     .maybeSingle();
   if (error) return { error: error.message };
@@ -195,11 +193,11 @@ export async function updateListRaw(
 }
 
 export async function updateList(request: Request, id: string) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   if (!uuidSchema.safeParse(id).success) return json({ error: "Invalid id" }, 400);
 
-  const result = await updateListRaw(await parseBody(request), id);
+  const result = await updateListRaw(await parseBody(request), id, principal.userId);
   if ("error" in result) {
     const status =
       result.error === "Not found" ? 404 : result.error.startsWith("Invalid input") ? 400 : 500;
@@ -209,8 +207,8 @@ export async function updateList(request: Request, id: string) {
 }
 
 export async function deleteList(request: Request, id: string) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   if (!uuidSchema.safeParse(id).success) return json({ error: "Invalid id" }, 400);
 
   const db = await admin();
@@ -218,6 +216,7 @@ export async function deleteList(request: Request, id: string) {
     .from("word_lists")
     .delete()
     .eq("id", id)
+    .eq("user_id", principal.userId)
     .select("id")
     .maybeSingle();
   if (error) return json({ error: error.message }, 500);
@@ -256,11 +255,28 @@ async function membershipsByWordId(
   return { data: map };
 }
 
-export async function listWordsRaw(filters: {
-  listId?: string | undefined;
-  tag?: string | undefined;
-  q?: string | undefined;
-}): Promise<{ data: SavedWordRow[]; count: number } | { error: string }> {
+async function listsBelongToUser(
+  db: Awaited<ReturnType<typeof admin>>,
+  listIds: string[],
+  userId: string,
+): Promise<boolean | { error: string }> {
+  const { data, error } = await db
+    .from("word_lists")
+    .select("id")
+    .eq("user_id", userId)
+    .in("id", listIds);
+  if (error) return { error: error.message };
+  return (data ?? []).length === listIds.length;
+}
+
+export async function listWordsRaw(
+  filters: {
+    listId?: string | undefined;
+    tag?: string | undefined;
+    q?: string | undefined;
+  },
+  userId: string,
+): Promise<{ data: SavedWordRow[]; count: number } | { error: string }> {
   const db = await admin();
 
   let wordIdFilter: string[] | undefined;
@@ -277,6 +293,7 @@ export async function listWordsRaw(filters: {
   let query = db
     .from("saved_words")
     .select("id, headword, note, tags, created_at, entry")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (wordIdFilter) query = query.in("id", wordIdFilter);
   if (filters.tag) query = query.contains("tags", [filters.tag.trim().toLowerCase()]);
@@ -300,30 +317,34 @@ export async function listWordsRaw(filters: {
 }
 
 export async function listWords(request: Request) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   const url = new URL(request.url);
-  const result = await listWordsRaw({
-    listId: url.searchParams.get("listId") ?? undefined,
-    tag: url.searchParams.get("tag") ?? undefined,
-    q: url.searchParams.get("q") ?? undefined,
-  });
+  const result = await listWordsRaw(
+    {
+      listId: url.searchParams.get("listId") ?? undefined,
+      tag: url.searchParams.get("tag") ?? undefined,
+      q: url.searchParams.get("q") ?? undefined,
+    },
+    principal.userId,
+  );
   if ("error" in result) return json({ error: result.error }, 500);
   return json(result);
 }
 
 export async function createWordRaw(
   input: unknown,
+  userId: string,
 ): Promise<{ data: unknown; updated: boolean } | { error: string }> {
   const parsed = createWordSchema.safeParse(input);
   if (!parsed.success) return { error: `Invalid input: ${JSON.stringify(parsed.error.flatten())}` };
 
-  const owner = ownerIdOrError();
-  if ("error" in owner) return owner;
-
   const db = await admin();
+  const listsAreOwned = await listsBelongToUser(db, parsed.data.listIds, userId);
+  if (typeof listsAreOwned !== "boolean") return listsAreOwned;
+  if (!listsAreOwned) return { error: "Invalid word list" };
   const values = compact({
-    user_id: owner.ownerId,
+    user_id: userId,
     headword: parsed.data.headword,
     note: parsed.data.note,
     tags: parsed.data.tags,
@@ -333,7 +354,7 @@ export async function createWordRaw(
   const { data: existing, error: findError } = await db
     .from("saved_words")
     .select("id")
-    .eq("user_id", owner.ownerId)
+    .eq("user_id", userId)
     .ilike(
       "headword",
       parsed.data.headword.replace(/[%_\\]/g, (c) => `\\${c}`),
@@ -367,15 +388,15 @@ export async function createWordRaw(
   );
   if (membershipError) return { error: membershipError.message };
 
-  const result = await getWordRaw(wordId);
+  const result = await getWordRaw(wordId, userId);
   if ("error" in result) return result;
   return { data: result.data, updated };
 }
 
 export async function createWord(request: Request) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
-  const result = await createWordRaw(await parseBody(request));
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
+  const result = await createWordRaw(await parseBody(request), principal.userId);
   if ("error" in result) {
     const status = result.error.startsWith("Invalid input") ? 400 : 500;
     return json({ error: result.error }, status);
@@ -383,12 +404,16 @@ export async function createWord(request: Request) {
   return json(result, result.updated ? 200 : 201);
 }
 
-export async function getWordRaw(id: string): Promise<{ data: SavedWordRow } | { error: string }> {
+export async function getWordRaw(
+  id: string,
+  userId: string,
+): Promise<{ data: SavedWordRow } | { error: string }> {
   const db = await admin();
   const { data, error } = await db
     .from("saved_words")
     .select("id, headword, note, tags, created_at, entry")
     .eq("id", id)
+    .eq("user_id", userId)
     .maybeSingle();
   if (error) return { error: error.message };
   if (!data) return { error: "Not found" };
@@ -404,10 +429,10 @@ export async function getWordRaw(id: string): Promise<{ data: SavedWordRow } | {
 }
 
 export async function getWord(request: Request, id: string) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   if (!uuidSchema.safeParse(id).success) return json({ error: "Invalid id" }, 400);
-  const result = await getWordRaw(id);
+  const result = await getWordRaw(id, principal.userId);
   if ("error" in result) {
     return json({ error: result.error }, result.error === "Not found" ? 404 : 500);
   }
@@ -417,17 +442,26 @@ export async function getWord(request: Request, id: string) {
 export async function updateWordRaw(
   input: unknown,
   id: string,
+  userId: string,
 ): Promise<{ data: unknown } | { error: string }> {
   const parsed = updateWordSchema.safeParse(input);
   if (!parsed.success) return { error: `Invalid input: ${JSON.stringify(parsed.error.flatten())}` };
 
   const db = await admin();
+  const owned = await getWordRaw(id, userId);
+  if ("error" in owned) return owned;
+  if (parsed.data.addListIds?.length) {
+    const listsAreOwned = await listsBelongToUser(db, parsed.data.addListIds, userId);
+    if (typeof listsAreOwned !== "boolean") return listsAreOwned;
+    if (!listsAreOwned) return { error: "Invalid word list" };
+  }
   const patch = compact({ note: parsed.data.note, tags: parsed.data.tags });
   if (Object.keys(patch).length > 0) {
     const { error, count } = await db
       .from("saved_words")
       .update(patch, { count: "exact" })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", userId);
     if (error) return { error: error.message };
     if (!count) return { error: "Not found" };
   }
@@ -460,15 +494,15 @@ export async function updateWordRaw(
     }
   }
 
-  return getWordRaw(id);
+  return getWordRaw(id, userId);
 }
 
 export async function updateWord(request: Request, id: string) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   if (!uuidSchema.safeParse(id).success) return json({ error: "Invalid id" }, 400);
 
-  const result = await updateWordRaw(await parseBody(request), id);
+  const result = await updateWordRaw(await parseBody(request), id, principal.userId);
   if ("error" in result) {
     const status =
       result.error === "Not found" ? 404 : result.error.startsWith("Invalid input") ? 400 : 500;
@@ -479,9 +513,12 @@ export async function updateWord(request: Request, id: string) {
 
 export async function deleteWordRaw(
   id: string,
+  userId: string,
   listId?: string,
 ): Promise<{ ok: true; deleted: boolean } | { error: string }> {
   const db = await admin();
+  const owned = await getWordRaw(id, userId);
+  if ("error" in owned) return owned;
 
   if (listId) {
     const { error, count } = await db
@@ -517,24 +554,28 @@ export async function deleteWordRaw(
 }
 
 export async function deleteWord(request: Request, id: string) {
-  const unauthorized = checkApiKey(request);
-  if (unauthorized) return unauthorized;
+  const principal = await checkApiKey(request);
+  if (principal instanceof Response) return principal;
   if (!uuidSchema.safeParse(id).success) return json({ error: "Invalid id" }, 400);
 
   const listId = new URL(request.url).searchParams.get("listId") ?? undefined;
-  const result = await deleteWordRaw(id, listId);
+  const result = await deleteWordRaw(id, principal.userId, listId);
   if ("error" in result) {
     return json({ error: result.error }, result.error === "Not found" ? 404 : 500);
   }
   return new Response(null, { status: 204 });
 }
 
-export async function deleteListRaw(id: string): Promise<{ ok: true } | { error: string }> {
+export async function deleteListRaw(
+  id: string,
+  userId: string,
+): Promise<{ ok: true } | { error: string }> {
   const db = await admin();
   const { data, error } = await db
     .from("word_lists")
     .delete()
     .eq("id", id)
+    .eq("user_id", userId)
     .select("id")
     .maybeSingle();
   if (error) return { error: error.message };
