@@ -43,46 +43,19 @@ export type Database = {
           created_at: string;
           display_name: string | null;
           id: string;
+          username: string | null;
         };
         Insert: {
           created_at?: string;
           display_name?: string | null;
           id: string;
+          username?: string | null;
         };
         Update: {
           created_at?: string;
           display_name?: string | null;
           id?: string;
-        };
-        Relationships: [];
-      };
-      saved_words: {
-        Row: {
-          created_at: string;
-          entry: Json | null;
-          headword: string;
-          id: string;
-          note: string;
-          tags: string[];
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          entry?: Json | null;
-          headword: string;
-          id?: string;
-          note?: string;
-          tags?: string[];
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          entry?: Json | null;
-          headword?: string;
-          id?: string;
-          note?: string;
-          tags?: string[];
-          user_id?: string;
+          username?: string | null;
         };
         Relationships: [];
       };
@@ -118,6 +91,36 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      saved_words: {
+        Row: {
+          created_at: string;
+          entry: Json | null;
+          headword: string;
+          id: string;
+          note: string;
+          tags: string[];
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          entry?: Json | null;
+          headword: string;
+          id?: string;
+          note?: string;
+          tags?: string[];
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          entry?: Json | null;
+          headword?: string;
+          id?: string;
+          note?: string;
+          tags?: string[];
+          user_id?: string;
+        };
+        Relationships: [];
       };
       word_lists: {
         Row: {
