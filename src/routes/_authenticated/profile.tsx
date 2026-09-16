@@ -14,6 +14,7 @@ function ProfilePage() {
   const [name, setName] = useState("MCP key");
   const [newKey, setNewKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const mcpUrl = typeof window === "undefined" ? "/api/mcp" : `${window.location.origin}/api/mcp`;
 
   async function refresh() {
     try {
@@ -82,6 +83,9 @@ function ProfilePage() {
                 Copy this now — it will not be shown again.
               </p>
               <code className="block break-all rounded bg-background p-2 text-sm">{newKey}</code>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Use it as the <code>x-api-key</code> header for: <code>{mcpUrl}</code>
+              </p>
             </div>
           )}
         </CardContent>

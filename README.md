@@ -127,6 +127,9 @@ To connect it as an MCP server (e.g. in Claude Code or Claude Desktop), add it
 as a remote HTTP server pointing at `/api/mcp` with the `x-api-key` header set
 to the personal key created on your Profile page.
 
+The Lovable-managed `/mcp` endpoint is separate and uses Supabase OAuth; use
+`/api/mcp` when connecting with a Profile API key.
+
 The implementation lives in `src/lib/words-api.ts` (REST + shared data logic)
 and `src/lib/mcp-api.ts` (the JSON-RPC MCP layer), wired up as TanStack Start
 server routes under `src/routes/api/`.
