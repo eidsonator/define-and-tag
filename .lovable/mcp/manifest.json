@@ -5,7 +5,9 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://qjhdycpkguutiunxtpvt.supabase.co/auth/v1",
-    "accepted_audiences": ["authenticated"]
+    "accepted_audiences": [
+      "authenticated"
+    ]
   },
   "mcp": {
     "server": {
@@ -50,7 +52,9 @@
               "description": "Name of the new list."
             }
           },
-          "required": ["name"]
+          "required": [
+            "name"
+          ]
         },
         "outputSchema": null
       },
@@ -80,7 +84,10 @@
               "description": "The new name."
             }
           },
-          "required": ["id", "name"]
+          "required": [
+            "id",
+            "name"
+          ]
         },
         "outputSchema": null
       },
@@ -104,7 +111,9 @@
               "description": "The list id."
             }
           },
-          "required": ["id"]
+          "required": [
+            "id"
+          ]
         },
         "outputSchema": null
       },
@@ -181,7 +190,10 @@
               }
             }
           },
-          "required": ["listIds", "headword"]
+          "required": [
+            "listIds",
+            "headword"
+          ]
         },
         "outputSchema": null
       },
@@ -235,7 +247,9 @@
               }
             }
           },
-          "required": ["id"]
+          "required": [
+            "id"
+          ]
         },
         "outputSchema": null
       },
@@ -265,7 +279,9 @@
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
             }
           },
-          "required": ["id"]
+          "required": [
+            "id"
+          ]
         },
         "outputSchema": null
       }
