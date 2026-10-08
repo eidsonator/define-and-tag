@@ -52,8 +52,8 @@ function useTextSize() {
 export function TextSizeControls() {
   const size = useTextSize();
   const [announce, setAnnounce] = useState("");
-  const min = TEXT_SIZE_STEPS[0];
-  const max = TEXT_SIZE_STEPS[TEXT_SIZE_STEPS.length - 1];
+  const min = TEXT_SIZE_STEPS[0] ?? 90;
+  const max = TEXT_SIZE_STEPS[TEXT_SIZE_STEPS.length - 1] ?? 175;
 
   function change(value: number) {
     setSize(value);

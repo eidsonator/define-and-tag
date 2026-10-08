@@ -10,7 +10,7 @@ export function normalizeTextSize(value: unknown): number {
 export function stepTextSize(current: number, dir: 1 | -1): number {
   const i = TEXT_SIZE_STEPS.indexOf(normalizeTextSize(current) as (typeof TEXT_SIZE_STEPS)[number]);
   const next = Math.min(TEXT_SIZE_STEPS.length - 1, Math.max(0, i + dir));
-  return TEXT_SIZE_STEPS[next];
+  return TEXT_SIZE_STEPS[next] ?? DEFAULT_TEXT_SIZE;
 }
 
 /** Runs in <head> before first paint so the page never flashes at the default size. */
