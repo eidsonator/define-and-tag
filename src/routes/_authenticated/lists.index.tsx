@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/lists/")({
     ],
   }),
   component: ListsPage,
-  errorComponent: ({ error }) => <p className="text-sm text-destructive">{error.message}</p>,
+  errorComponent: ({ error }) => <p className="text-sm text-destructive">{(error as Error).message}</p>,
 });
 
 function ListsPage() {
@@ -83,7 +83,7 @@ function ListsPage() {
       </header>
 
       <form
-        className="flex gap-2"
+        className="flex flex-wrap gap-2 [&>input]:min-w-48 [&>input]:flex-1"
         onSubmit={(e) => {
           e.preventDefault();
           if (newName.trim()) createMutation.mutate(newName.trim());
@@ -102,10 +102,10 @@ function ListsPage() {
 
       <ul className="space-y-3">
         {lists.map((list) => (
-          <li key={list.id} className="paper-panel flex items-center gap-3 rounded-lg p-4">
+          <li key={list.id} className="paper-panel flex flex-wrap items-center gap-3 rounded-lg p-4">
             {editingId === list.id ? (
               <form
-                className="flex flex-1 gap-2"
+                className="flex flex-1 flex-wrap gap-2 [&>input]:min-w-40 [&>input]:flex-1"
                 onSubmit={(e) => {
                   e.preventDefault();
                   renameMutation.mutate({ id: list.id, name: editingName });

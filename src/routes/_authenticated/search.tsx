@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/search")({
     ],
   }),
   component: SearchPage,
-  errorComponent: ({ error }) => <p className="text-sm text-destructive">{error.message}</p>,
+  errorComponent: ({ error }) => <p className="text-sm text-destructive">{(error as Error).message}</p>,
 });
 
 function SearchPage() {
@@ -138,13 +138,13 @@ function SearchPage() {
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
             placeholder="serendipity"
-            className="h-14 rounded-full bg-paper pl-11 pr-4 font-display text-lg shadow-sm"
+            className="h-14 rounded-full bg-paper pl-11 pr-4 font-display text-lg text-ios-safe-lg shadow-sm"
             aria-label="Search for a word"
           />
         </form>
 
         {showSuggestions && debounced.length >= 2 && suggestions.length > 0 && (
-          <ul className="paper-panel absolute z-20 mt-2 w-full overflow-hidden rounded-lg py-1">
+          <ul className="paper-panel absolute z-20 mt-2 max-h-[60dvh] w-full overflow-y-auto overflow-x-hidden rounded-lg py-1">
             {suggestions.map((s) => (
               <li key={s}>
                 <button

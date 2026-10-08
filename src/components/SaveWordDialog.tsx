@@ -143,6 +143,7 @@ export function SaveWordDialog({
           <div className="space-y-2">
             <Label htmlFor="note">Note</Label>
             <Textarea
+              className="text-ios-safe"
               id="note"
               rows={3}
               placeholder="Where you met this word, how you'd use it…"

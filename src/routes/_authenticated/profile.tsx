@@ -54,7 +54,10 @@ function ProfilePage() {
   async function saveUsername(event: React.FormEvent) {
     event.preventDefault();
     const errorMessage = usernameError(username);
-    if (errorMessage) return toast.error(errorMessage);
+    if (errorMessage) {
+      toast.error(errorMessage);
+      return;
+    }
     setSavingUsername(true);
     const normalized = normalizeUsername(username);
     const { error } = await supabase
