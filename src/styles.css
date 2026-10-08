@@ -131,7 +131,14 @@
     border-color: var(--color-border);
   }
 
+  html {
+    font-size: var(--root-scale, 100%);
+    overflow-x: clip;
+  }
+
   body {
+    overflow-x: clip;
+    overflow-wrap: anywhere;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -151,4 +158,12 @@
   background-color: var(--color-paper);
   border: 1px solid var(--color-border);
   box-shadow: 0 1px 0 0 oklch(0 0 0 / 4%);
+}
+
+/* Inputs stay at 16px or more so iOS never zooms on focus. */
+@utility text-ios-safe {
+  font-size: max(16px, 1rem) !important;
+}
+@utility text-ios-safe-lg {
+  font-size: max(16px, 1.125rem) !important;
 }
