@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookMarked, Search, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { TextSizeControls, TextSizeFab } from "@/components/TextSize";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -40,7 +41,7 @@ function AuthedLayout() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-paper">
-        <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-3">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-2 px-4 py-3">
           <Link to="/search" className="mr-auto font-display text-xl font-semibold tracking-tight">
             Lexicon
           </Link>
@@ -60,14 +61,18 @@ function AuthedLayout() {
               <span className="hidden sm:inline">{username ? `@${username}` : "Profile"}</span>
             </Link>
           </Button>
+          <div className="hidden md:block">
+            <TextSizeControls />
+          </div>
           <Button variant="outline" size="sm" onClick={signOut}>
             Sign out
           </Button>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main className="mx-auto max-w-4xl px-4 py-8 pb-24 md:pb-8">
         <Outlet />
       </main>
+      <TextSizeFab />
     </div>
   );
 }

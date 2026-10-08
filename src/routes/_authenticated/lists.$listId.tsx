@@ -132,7 +132,7 @@ function ListDetailPage() {
           />
         </div>
         <div
-          className="flex items-center gap-1 rounded-md border border-border bg-paper p-1"
+          className="flex flex-wrap items-center gap-1 rounded-md border border-border bg-paper p-1"
           role="group"
           aria-label="Sort words"
         >
@@ -252,20 +252,20 @@ function SavedWordCard({
 
   return (
     <div className="paper-panel rounded-lg p-5">
-      <div className="flex items-start gap-3">
-        <button className="flex-1 text-left" onClick={() => setOpen((o) => !o)}>
+      <div className="flex flex-wrap items-start gap-3">
+        <button className="min-w-0 flex-1 basis-48 text-left" onClick={() => setOpen((o) => !o)}>
           <h2 className="font-display text-xl font-semibold">{word.headword}</h2>
           {word.entry?.shortdefs?.[0] && (
             <p className="mt-1 text-sm text-muted-foreground">{word.entry.shortdefs[0]}</p>
           )}
         </button>
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <Select
             value=""
             onValueChange={(toListId) => moveMutation.mutate(toListId)}
             disabled={moveMutation.isPending || lists.length < 2}
           >
-            <SelectTrigger className="h-8 w-32 text-xs" aria-label="Move word to another list">
+            <SelectTrigger className="min-h-8 w-32 text-xs" aria-label="Move word to another list">
               <SelectValue placeholder="Move to…" />
             </SelectTrigger>
             <SelectContent>
@@ -322,6 +322,7 @@ function SavedWordCard({
               Note
             </label>
             <Textarea
+              className="text-ios-safe"
               id={`note-${word.id}`}
               rows={3}
               value={note}

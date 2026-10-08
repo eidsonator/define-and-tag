@@ -25,7 +25,7 @@ export function EntryView({
     ));
 
   return (
-    <article className="paper-panel rounded-lg p-6">
+    <article className="paper-panel rounded-lg p-4 sm:p-6">
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <h2 className="font-display text-3xl font-semibold tracking-tight">{entry.headword}</h2>
         {entry.pronunciation && (
@@ -42,10 +42,10 @@ export function EntryView({
           : entry.shortdefs.map((t) => ({ label: "", text: t, examples: [] }))
         ).map((sense, i) => (
           <li key={i} className="flex gap-3">
-            <span className="mt-0.5 min-w-6 font-display text-sm text-muted-foreground">
+            <span className="mt-0.5 min-w-6 shrink-0 font-display text-sm text-muted-foreground">
               {sense.label || i + 1}
             </span>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <p className="leading-relaxed">{sense.text}</p>
               {sense.examples.map((ex, j) => (
                 <p
