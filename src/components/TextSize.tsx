@@ -85,7 +85,7 @@ export function TextSizeControls() {
       </Button>
       <Button
         variant="ghost"
-        className="min-h-11 px-3 text-xs"
+        className="min-h-11 whitespace-nowrap px-3 text-xs"
         aria-label="Reset text size to 100 percent"
         disabled={size === DEFAULT_TEXT_SIZE}
         onClick={() => change(DEFAULT_TEXT_SIZE)}
